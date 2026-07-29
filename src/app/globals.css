@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Bring Gift Card — Global Design System
+   WHITE & BLUE premium fintech · 3D exploded hero · glassmorphism
+   Default theme = light (white surfaces, blue accents), matching
+   the brand logo. Dark accents reserved for the hero stage only.
+   ============================================================ */
+
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f9ff;
+  --bg-2: #eef4ff;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --border: rgba(15, 43, 92, 0.1);
+  --border-strong: rgba(15, 43, 92, 0.18);
+  --text: #0f2b5c;
+  --text-dim: #5a6b8c;
+  --brand: #1864db;
+  --brand-2: #2f86f5;
+  --brand-deep: #0f2b5c;
+  --gold: #d97706;
+  --emerald: #059669;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-outfit), var(--font-inter), sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--brand-deep);
+}
+
+/* Ambient page background — white with soft blue radial washes + subtle grid */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(47, 134, 245, 0.14), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 20%, rgba(24, 100, 219, 0.1), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 0% 80%, rgba(59, 130, 246, 0.08), transparent 55%),
+    var(--bg);
+}
+.page-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(to right, rgba(15, 43, 92, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 43, 92, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 80%);
+}
+
+/* ---------- Glassmorphism (on white) ---------- */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+}
+.glass-strong {
+  background: var(--surface-strong);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 20px 50px -20px rgba(15, 43, 92, 0.18);
+}
+.glass-pill {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.lift {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.45s ease, border-color 0.45s ease;
+}
+.lift:hover {
+  transform: translateY(-6px);
+  border-color: rgba(24, 100, 219, 0.35);
+  box-shadow: 0 30px 60px -25px rgba(24, 100, 219, 0.28);
+}
+
+/* ---------- Gradient text ---------- */
+.text-gradient {
+  background: linear-gradient(120deg, #1864db 0%, #2f86f5 50%, #59a6ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-gold {
+  background: linear-gradient(120deg, #fcd34d 0%, #d97706 60%, #b45309 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============================================================
+   3D HERO STAGE (the one dark surface — the "stage" object)
+   The stage stays on a deep-blue gradient so the white/blue cards
+   pop with depth. The rest of the page stays light.
+   ============================================================ */
+
+.stage {
+  perspective: 1600px;
+  perspective-origin: 50% 45%;
+}
+.scene {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.layer {
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* The gift card faces — white/blue brand gradients */
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow, 0 40px 80px -30px rgba(0,0,0,0.85));
+}
+.card-face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg,
+    transparent 30%,
+    rgba(255,255,255,0.4) 47%,
+    rgba(255,255,255,0.08) 53%,
+    transparent 70%);
+  background-size: 250% 250%;
+  animation: shimmer 6s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+.card-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 14px 14px;
+  opacity: 0.5;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(0.5px);
+  will-change: transform, opacity;
+}
+.orbit {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  transform-style: preserve-3d;
+}
+
+/* ---------- Custom scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-soft); }
+::-webkit-scrollbar-thumb { background: #b9d0f5; border-radius: 6px; border: 2px solid var(--bg-soft); }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-2); }
+
+::selection { background: rgba(47, 134, 245, 0.2); color: var(--brand-deep); }
+
+/* Reduce motion / mobile */
+@media (max-width: 768px) {
+  .stage { perspective: 1100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
