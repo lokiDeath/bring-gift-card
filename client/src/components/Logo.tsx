@@ -12,10 +12,20 @@ interface LogoProps {
 
 /**
  * Brand logo for Bring Gift Card.
- * - `onLight` (default): uses the blue logo tile → fits on white/light backgrounds.
- * - `onDark`: uses the white logo tile → fits on royal-blue / dark backgrounds.
  *
- * The tile is rendered as a rounded badge so it blends into either surface.
+ * Uses the transparent white-globe PNG (`logo-transparent.png`) — no
+ * background box, no rounded tile, no colored backing. Just the white
+ * logo shape placed directly on the page background.
+ *
+ * - `onDark` (default for hero): white logo shows directly on the dark
+ *   royal-blue background — perfect contrast, no filter needed.
+ *
+ * - `onLight` (when scrolled): the white logo wouldn't show on white,
+ *   so we apply a CSS filter to recolor it royal blue.
+ *   (`invert + hue-rotate` turns white → royal blue while keeping transparency.)
+ *
+ * Implementation: just an `<img>` with no surrounding box. The wordmark
+ * text sits next to it.
  */
 export function Logo({
   variant = "onLight",
@@ -24,25 +34,32 @@ export function Logo({
   showWordmark = true,
   wordmarkClassName,
 }: LogoProps) {
-  const src = variant === "onDark" ? "/logo-white.png" : "/logo-blue.jpg";
+  // On dark backgrounds: white logo shows as-is.
+  // On light backgrounds: filter the white logo to royal blue.
+  //   `invert(1)` → makes the white logo black, transparent stays transparent.
+  //   But we want royal blue, not black. So we use a combination:
+  //   `brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg)`
+  //   → turns white into a saturated royal blue.
+  const filterStyle =
+    variant === "onDark"
+      ? undefined
+      : "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(200deg) brightness(0.85)";
+
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <span
-        className={cn(
-          "relative inline-block overflow-hidden rounded-2xl ring-1 shadow-sm",
-          variant === "onDark" ? "ring-white/15" : "ring-black/5"
-        )}
-        style={{ width: size, height: size }}
-      >
-        <img
-          src={src}
-          alt="Bring Gift Card logo"
-          width={size}
-          height={size}
-          className="h-full w-full object-cover"
-          draggable={false}
-        />
-      </span>
+      <img
+        src="/logo-transparent.png"
+        alt="Bring Gift Card logo"
+        width={size}
+        height={size}
+        className="object-contain"
+        style={{
+          width: size,
+          height: size,
+          filter: filterStyle,
+        }}
+        draggable={false}
+      />
       {showWordmark && (
         <span
           className={cn(

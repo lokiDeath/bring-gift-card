@@ -92,9 +92,9 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-32 sm:px-6 lg:grid-cols-2 lg:px-8">
-        {/* Left — copy */}
-        <div>
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
+        {/* Left — copy (takes left half; cards are absolutely positioned over the right half) */}
+        <div className="lg:max-w-xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -187,17 +187,19 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
             </span>
           </motion.div>
         </div>
-
-        {/* Right — 3D hero */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="hidden lg:block"
-        >
-          <Hero3D />
-        </motion.div>
       </div>
+
+      {/* 3D hero — absolutely positioned over the right half of the hero section.
+          Rendered OUTSIDE the grid so it can spread wide without being clipped
+          by the grid column. Hidden on mobile (lg:block). */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 z-10 hidden lg:block"
+      >
+        <Hero3D />
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div

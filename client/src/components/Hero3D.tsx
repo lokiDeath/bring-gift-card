@@ -4,27 +4,29 @@ import { ShieldCheck, Zap } from "lucide-react";
 
 /**
  * Premium hero showcase — three realistic gift cards
- * (Apple, Amazon, Google Play) with:
+ * (Apple, Amazon, Google Play) in a WIDE SPREAD fan.
  *
- * 1. MASSIVE transparent logo watermark on each card (mix-blend-mode: screen)
- * 2. Persistent "100% Secure" + "Instant Pay" badges on the front card
- * 3. Continuous gentle floating animation (hovering in mid-air)
- * 4. 4-state click cycle:
- *      State 0 (default): spread DOWN
- *      State 1: stacked
- *      State 2: spread UP
- *      State 3: stacked
- *      State 4: spread DOWN (back to start)
- *    Click any card to advance to the next state.
+ * Click cycle (simple alternating toggle):
+ *   State 0 (default): SPREAD DOWN  (back cards rotated+offset DOWN)
+ *   Click → State 1:   STACKED      (all aligned)
+ *   Click → State 2:   SPREAD UP    (back cards rotated+offset UP)
+ *   Click → State 3:   STACKED
+ *   Click → State 0:   SPREAD DOWN  (cycle repeats)
+ *
+ * The "100% Secure" and "Instant Pay" badges are POSITIONED ABSOLUTELY
+ * relative to the card-area container (NOT attached to any card), so they
+ * float in the same spot no matter what state the cards are in.
+ *
+ * A continuous gentle floating animation makes the whole stack hover.
  */
 export function Hero3D() {
   const ref = useRef<HTMLDivElement>(null);
   const [clickCount, setClickCount] = useState(0);
 
-  // 4-state cycle: 0 = spread-down, 1 = stack, 2 = spread-up, 3 = stack
+  // 4-state cycle: 0=spread-down, 1=stack, 2=spread-up, 3=stack
   const phase = clickCount % 4;
   const isStacked = phase === 1 || phase === 3;
-  const isSpreadUp = phase === 2; // phase 0 = spread-down (default)
+  const isSpreadUp = phase === 2;
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -40,33 +42,52 @@ export function Hero3D() {
   const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.55, 0.85, 0.35]);
   const glowScale = useTransform(progress, [0, 1], [1, 1.2]);
 
-  // Whole scene scroll parallax (separate from floating animation).
+  // Scroll parallax for the whole scene.
   const sceneY = useTransform(progress, [0, 1], [0, -40]);
 
-  // ── Card position targets per state ──
-  // SPREAD DOWN: back cards go DOWN (positive Y), rotated CCW.
-  // SPREAD UP:   back cards go UP (negative Y), rotated CCW.
-  // STACK:       all cards aligned, tiny rotation hint.
-  const OFFSET_Y = 56;
+  // ── Wide spread layout (matching the original fan) ──
+  // SPREAD: 3 cards fanned wide, each rotated ~22° apart, offset horizontally.
+  // The back cards lift/drop based on direction (UP or DOWN).
   const dir = isSpreadUp ? -1 : 1; // -1 = up, 1 = down
+  const SPREAD_OFFSET_Y = 100; // how far back cards offset vertically
+  const SPREAD_OFFSET_X = 220; // how far back cards offset horizontally
 
+  // Card 1 (FRONT, Apple): center, slight rotation
   const card1Target = isStacked
     ? { x: 0, y: -8, rotate: -3, zIndex: 30, scale: 1 }
-    : { x: 0, y: 0, rotate: -18, zIndex: 30, scale: 1 };
+    : { x: 0, y: 0, rotate: -16, zIndex: 30, scale: 1 };
 
+  // Card 2 (MIDDLE, Amazon): left of center, more rotation, vertical offset
   const card2Target = isStacked
     ? { x: 0, y: 0, rotate: 0, zIndex: 20, scale: 1 }
-    : { x: -30, y: OFFSET_Y * dir, rotate: -36, zIndex: 20, scale: 1 };
+    : {
+        x: -SPREAD_OFFSET_X,
+        y: SPREAD_OFFSET_Y * dir,
+        rotate: -32,
+        zIndex: 20,
+        scale: 1,
+      };
 
+  // Card 3 (BACK, Google Play): far left, most rotation, bigger vertical offset
   const card3Target = isStacked
     ? { x: 0, y: 8, rotate: 3, zIndex: 10, scale: 1 }
-    : { x: -60, y: OFFSET_Y * 2 * dir, rotate: -54, zIndex: 10, scale: 1 };
+    : {
+        x: -SPREAD_OFFSET_X * 2,
+        y: SPREAD_OFFSET_Y * 2 * dir,
+        rotate: -48,
+        zIndex: 10,
+        scale: 1,
+      };
 
   const spring = { type: "spring" as const, stiffness: 140, damping: 18, mass: 0.9 };
 
   return (
-    <div ref={ref} className="relative h-[680px] w-full perspective-2000 sm:h-[720px]">
-      {/* Backdrop glow (royal blue + gold) */}
+    <div
+      ref={ref}
+      className="absolute inset-0 perspective-2000"
+      style={{ pointerEvents: "none" }}
+    >
+      {/* Backdrop glow */}
       <motion.div
         style={{ opacity: glowOpacity, scale: glowScale }}
         className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1E5BD6] blur-[120px]"
@@ -76,7 +97,21 @@ export function Hero3D() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A24B]/25 blur-[110px]"
       />
 
-      {/* Scroll-parallax wrapper */}
+      {/* Inner wrapper re-enables pointer events for the cards.
+          Positioned at the right side of the hero (where the grid column
+          would have been) but with a wider width so the spread-out cards
+          actually fit. */}
+      <div
+        className="absolute top-1/2 -translate-y-1/2"
+        style={{
+          left: "55%",
+          right: "4%",
+          height: "680px",
+          pointerEvents: "auto",
+        }}
+      >
+
+      {/* Scroll parallax wrapper */}
       <motion.div
         style={{ y: sceneY }}
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -86,8 +121,9 @@ export function Hero3D() {
           animate={{ y: [0, -12, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
-          {/* Card container */}
-          <div className="relative h-[460px] w-[640px] sm:h-[500px] sm:w-[700px]">
+          {/* Card-area container — badges are positioned relative to THIS,
+              so they stay in the same spot regardless of card state. */}
+          <div className="relative h-[460px] w-[900px] sm:h-[500px] sm:w-[1000px]">
             {/* Ground shadow */}
             <div
               className="absolute -bottom-4 left-1/2 h-12 w-[70%] -translate-x-1/2 rounded-[50%] bg-black/50 blur-2xl"
@@ -120,7 +156,7 @@ export function Hero3D() {
               </div>
             </motion.div>
 
-            {/* Card 1 — FRONT (Apple) with persistent badges */}
+            {/* Card 1 — FRONT (Apple) */}
             <motion.div
               className="absolute left-1/2 top-1/2 cursor-pointer"
               onClick={() => setClickCount((c) => c + 1)}
@@ -128,26 +164,28 @@ export function Hero3D() {
               transition={spring}
               whileHover={{ scale: 1.04 }}
             >
-              <div className="relative -translate-x-1/2 -translate-y-1/2">
+              <div className="-translate-x-1/2 -translate-y-1/2">
                 <AppleCard />
-
-                {/* Persistent badges — ALWAYS visible on the front card,
-                    whether stacked or spread. */}
-                <div className="absolute -bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#0047AB] shadow-lg ring-1 ring-black/5">
-                    <ShieldCheck className="h-3 w-3" />
-                    100% Secure
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C9A24B] px-3 py-1.5 text-[10px] font-bold text-white shadow-lg ring-1 ring-black/5">
-                    <Zap className="h-3 w-3" />
-                    Instant Pay
-                  </span>
-                </div>
               </div>
             </motion.div>
+
+            {/* Fixed-position floating badges — positioned absolutely on the
+                card-area container, NOT on any card. They stay in this exact
+                spot whether the cards are stacked, spread down, or spread up. */}
+            <div className="pointer-events-none absolute bottom-2 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#0047AB] shadow-lg ring-1 ring-black/5">
+                <ShieldCheck className="h-3 w-3" />
+                100% Secure
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C9A24B] px-3 py-1.5 text-[10px] font-bold text-white shadow-lg ring-1 ring-black/5">
+                <Zap className="h-3 w-3" />
+                Instant Pay
+              </span>
+            </div>
           </div>
         </motion.div>
       </motion.div>
+      </div>
     </div>
   );
 }
@@ -169,7 +207,7 @@ interface CardProps {
  * Contains a MASSIVE transparent logo watermark using mix-blend-mode: screen.
  * Only the white parts of the logo show through; the transparent background
  * of the PNG is invisible. The watermark sits at z-index 0; the card content
- * (text, logos, badges) sits at z-index 10 so it's always on top.
+ * (text, logos) sits at z-index 10 so it's always on top.
  */
 function CardShell({ children, background }: CardProps) {
   return (
@@ -180,11 +218,7 @@ function CardShell({ children, background }: CardProps) {
       {/* Background layer */}
       {background}
 
-      {/* Massive transparent logo watermark.
-          mix-blend-mode: screen → only the white logo pixels show;
-          the transparent PNG background disappears entirely.
-          opacity: 0.3 → subtle watermark, not overpowering.
-          150% size + centered → fills the card massively. */}
+      {/* Massive transparent logo watermark */}
       <img
         src="/logo-transparent.png"
         alt=""
@@ -200,7 +234,7 @@ function CardShell({ children, background }: CardProps) {
         }}
       />
 
-      {/* Subtle top sheen (between watermark and content) */}
+      {/* Subtle top sheen */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-3xl"
         style={{
