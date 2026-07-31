@@ -36,7 +36,11 @@ export function Header({ onAdminLogin }: HeaderProps) {
         >
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <a href="#home" className="flex items-center">
-              {scrolled ? <Logo variant="onLight" size={42} /> : <Logo variant="onDark" size={42} />}
+              {scrolled ? (
+                <Logo variant="onLight" size={42} animateWordmark />
+              ) : (
+                <Logo variant="onDark" size={42} animateWordmark />
+              )}
             </a>
 
             {/* Hamburger */}
