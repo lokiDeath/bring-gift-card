@@ -76,14 +76,6 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
       <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[#1E5BD6]/30 blur-[120px]" />
       <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-[#C9A24B]/10 blur-[100px]" />
 
-      {/* Logo watermark */}
-      <img
-        src="/logo-white.png"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 object-contain opacity-[0.04] select-none"
-      />
-
       <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-32 sm:px-6 lg:grid-cols-2 lg:px-8">
         {/* Left — copy */}
         <div>
@@ -114,10 +106,9 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-6 max-w-xl text-lg leading-relaxed text-white/70 sm:text-xl"
+            className="mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg"
           >
-            Trade Steam, Apple, Amazon, and 50+ brands at the best rates. Crypto
-            exchange and global money transfers — all in one premium platform.
+            <span className="font-semibold text-white">BRING GIFT CARD</span> delivers secure, instant, and reliable gift card trading worldwide. Get the best rates for Amazon, Steam, iTunes, Google Play, Xbox and many more, paid out within minutes.
           </motion.p>
 
           <motion.div
@@ -133,7 +124,7 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
               className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#0047AB] shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
               <MessageCircle className="h-4 w-4" />
-              Get instant quote
+              Chat on WhatsApp
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
@@ -153,10 +144,10 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
             className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-white/50"
           >
             <span className="inline-flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#5B85E5]" /> Bank-grade security
+              <ShieldCheck className="h-3.5 w-3.5 text-[#5B85E5]" /> 100% secure
             </span>
             <span className="inline-flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-[#5B85E5]" /> 5-min average payout
+              <Zap className="h-3.5 w-3.5 text-[#5B85E5]" /> Instant pay
             </span>
             <span className="inline-flex items-center gap-2">
               <Globe className="h-3.5 w-3.5 text-[#5B85E5]" /> 80+ countries served
