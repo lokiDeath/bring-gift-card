@@ -77,9 +77,9 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
       <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-[#C9A24B]/10 blur-[100px]" />
 
       {/* Logo watermark — the new transparent white-globe logo.
-          Because the PNG has no background, only the white globe silhouette
-          shows against the royal-blue gradient. Big and centered behind
-          the cards — no white blob, just the logo shape. */}
+          BIG and centered behind the cards. Because the PNG has no
+          background, only the white globe silhouette shows against the
+          royal-blue gradient — no white blob, just the logo shape. */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none"
         aria-hidden
@@ -87,7 +87,7 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
         <img
           src="/logo-transparent.png"
           alt=""
-          className="h-[680px] w-[680px] object-contain opacity-[0.10]"
+          className="h-[1100px] w-[1100px] object-contain opacity-[0.12]"
           draggable={false}
         />
       </div>

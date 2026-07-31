@@ -169,18 +169,32 @@ export function Hero3D() {
               </div>
             </motion.div>
 
-            {/* Fixed-position floating badges — positioned absolutely on the
-                card-area container, NOT on any card. They stay in this exact
-                spot whether the cards are stacked, spread down, or spread up. */}
-            <div className="pointer-events-none absolute bottom-2 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#0047AB] shadow-lg ring-1 ring-black/5">
-                <ShieldCheck className="h-3 w-3" />
-                100% Secure
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C9A24B] px-3 py-1.5 text-[10px] font-bold text-white shadow-lg ring-1 ring-black/5">
-                <Zap className="h-3 w-3" />
-                Instant Pay
-              </span>
+            {/* Floating badges — positioned on the LEFT and RIGHT sides of
+                the front card, slightly overlapping its edges. They float
+                independently of the card state (always in the same spot
+                relative to the card-area container). */}
+            <div className="pointer-events-none absolute left-[28%] top-[38%] z-50">
+              <div className="flex -translate-x-1/2 items-center gap-2 rounded-2xl bg-white/90 p-2.5 shadow-xl ring-1 ring-black/5 backdrop-blur">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0047AB]/10 text-[#0047AB]">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-[#0A1224]">100% Secure</p>
+                  <p className="text-[9px] text-[#6B7384]">Bank-grade encryption</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pointer-events-none absolute right-[28%] top-[42%] z-50">
+              <div className="flex translate-x-1/2 items-center gap-2 rounded-2xl bg-white/90 p-2.5 shadow-xl ring-1 ring-black/5 backdrop-blur">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C9A24B]/15 text-[#C9A24B]">
+                  <Zap className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-[#0A1224]">Instant Pay</p>
+                  <p className="text-[9px] text-[#6B7384]">≤ 5 min average</p>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -199,6 +213,8 @@ const CARD_H = Math.round(CARD_W / 1.586); // ~277
 interface CardProps {
   children: React.ReactNode;
   background: React.ReactNode;
+  /** Show the massive transparent logo watermark on this card. Default true. */
+  withWatermark?: boolean;
 }
 
 /**
@@ -208,8 +224,11 @@ interface CardProps {
  * Only the white parts of the logo show through; the transparent background
  * of the PNG is invisible. The watermark sits at z-index 0; the card content
  * (text, logos) sits at z-index 10 so it's always on top.
+ *
+ * Pass `withWatermark={false}` to skip the watermark (used on the Amazon card
+ * where the user explicitly requested it be removed).
  */
-function CardShell({ children, background }: CardProps) {
+function CardShell({ children, background, withWatermark = true }: CardProps) {
   return (
     <div
       className="relative overflow-hidden rounded-3xl shadow-[0_40px_90px_-20px_rgba(0,0,0,0.6)] ring-1 ring-black/10"
@@ -218,21 +237,23 @@ function CardShell({ children, background }: CardProps) {
       {/* Background layer */}
       {background}
 
-      {/* Massive transparent logo watermark */}
-      <img
-        src="/logo-transparent.png"
-        alt=""
-        aria-hidden
-        draggable={false}
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 object-contain"
-        style={{
-          width: "150%",
-          height: "150%",
-          mixBlendMode: "screen",
-          opacity: 0.3,
-          zIndex: 0,
-        }}
-      />
+      {/* Massive transparent logo watermark (optional) */}
+      {withWatermark && (
+        <img
+          src="/logo-transparent.png"
+          alt=""
+          aria-hidden
+          draggable={false}
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 object-contain"
+          style={{
+            width: "150%",
+            height: "150%",
+            mixBlendMode: "screen",
+            opacity: 0.3,
+            zIndex: 0,
+          }}
+        />
+      )}
 
       {/* Subtle top sheen */}
       <div
@@ -329,37 +350,30 @@ function AppleScribbleLogo({ className = "" }: { className?: string }) {
 }
 
 /* =========================================================================
-   AMAZON GIFT CARD — dark charcoal card, centered white "amazon" wordmark
-   with orange smile/arrow.
+   AMAZON GIFT CARD — clean dark charcoal background, centered white
+   "amazon" wordmark with the signature orange smile/arrow underneath.
+   NO tagline, NO watermark (per user request).
    ========================================================================= */
 function AmazonCard() {
   return (
     <CardShell
+      withWatermark={false}
       background={
         <>
           <div className="absolute inset-0 bg-[#131921]" />
+          {/* Very subtle radial highlight to give the card depth */}
           <div
-            className="absolute inset-0 opacity-40"
+            className="absolute inset-0 opacity-30"
             style={{
               background:
-                "radial-gradient(circle at 50% 50%, rgba(255,153,0,0.08), transparent 60%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 top-0 h-1/3"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)",
+                "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.04), transparent 70%)",
             }}
           />
         </>
       }
     >
-      <div className="flex h-full flex-col items-center justify-center text-center">
+      <div className="flex h-full items-center justify-center">
         <AmazonWordmarkLarge />
-        <p className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-medium uppercase tracking-[0.3em] text-white/40">
-          Gift Card
-        </p>
       </div>
     </CardShell>
   );
@@ -367,12 +381,13 @@ function AmazonCard() {
 
 function AmazonWordmarkLarge() {
   return (
-    <svg viewBox="0 0 200 80" className="w-[80%] max-w-[320px]" aria-hidden>
+    <svg viewBox="0 0 200 90" className="w-[75%] max-w-[340px]" aria-hidden>
+      {/* "amazon" wordmark — bold lowercase, perfectly centered */}
       <text
         x="100"
-        y="38"
+        y="42"
         fontFamily="Arial, Helvetica, sans-serif"
-        fontSize="44"
+        fontSize="46"
         fontWeight="700"
         fill="white"
         textAnchor="middle"
@@ -380,17 +395,19 @@ function AmazonWordmarkLarge() {
       >
         amazon
       </text>
+      {/* Smile/arrow — curved stroke from left to right with arrowhead */}
       <path
-        d="M40 50 Q 100 68, 160 50"
+        d="M30 52 Q 100 76, 170 50"
         stroke="#FF9900"
-        strokeWidth="4"
+        strokeWidth="5"
         fill="none"
         strokeLinecap="round"
       />
+      {/* Arrow head — points up-right at the end of the smile */}
       <path
-        d="M150 42 L 162 50 L 152 60"
+        d="M158 42 L 172 50 L 161 62"
         stroke="#FF9900"
-        strokeWidth="4"
+        strokeWidth="5"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -400,8 +417,9 @@ function AmazonWordmarkLarge() {
 }
 
 /* =========================================================================
-   GOOGLE PLAY GIFT CARD — white card, multicolor triangle logo, "Google Play"
-   text in grey.
+   GOOGLE PLAY GIFT CARD — clean white background, centered multicolor
+   Google Play triangle logo, "Google Play" text below in grey.
+   NO tagline — matches the reference image exactly.
    ========================================================================= */
 function GooglePlayCard() {
   return (
@@ -409,44 +427,47 @@ function GooglePlayCard() {
       background={
         <>
           <div className="absolute inset-0 bg-white" />
+          {/* Very subtle corner glow for depth */}
           <div
-            className="absolute -inset-10 opacity-40"
+            className="absolute inset-0 opacity-30"
             style={{
               background:
-                "linear-gradient(115deg, transparent 30%, rgba(0,197,255,0.08) 45%, rgba(0,230,118,0.08) 55%, rgba(255,193,7,0.08) 65%, rgba(255,61,0,0.08) 75%, transparent 90%)",
+                "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.02), transparent 70%)",
             }}
           />
         </>
       }
     >
-      <div className="flex h-full flex-col items-center justify-center gap-5 text-center">
+      <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
         <GooglePlayTriangleLarge className="h-24 w-24" />
-        <div>
-          <p
-            className="font-display text-[28px] font-medium leading-tight text-[#5F6368]"
-            style={{ letterSpacing: "-0.5px" }}
-          >
-            Google Play
-          </p>
-          <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.3em] text-[#9AA0A6]">
-            Apps · Games · Movies
-          </p>
-        </div>
+        <p
+          className="font-display text-[30px] font-medium leading-tight text-[#5F6368]"
+          style={{ letterSpacing: "-0.5px" }}
+        >
+          Google Play
+        </p>
       </div>
     </CardShell>
   );
 }
 
 function GooglePlayTriangleLarge({ className = "" }: { className?: string }) {
+  // The Google Play triangle — 4 colored segments meeting at an off-center point.
+  // Colors from the reference: green #4CAF50, blue #2196F3, red #F44336, yellow #FFC107.
   return (
     <svg viewBox="0 0 100 100" className={className} aria-hidden>
+      {/* Top segment — green */}
       <path d="M22 12 L 50 44 L 62 36 L 30 8 C 26.5 6, 23.5 8, 22 12 Z" fill="#4CAF50" />
+      {/* Left segment — blue */}
       <path d="M22 12 C 21 16, 21 84, 22 88 L 50 56 L 50 44 Z" fill="#2196F3" />
+      {/* Bottom segment — red */}
       <path d="M22 88 C 23.5 92, 26.5 94, 30 92 L 62 64 L 50 56 Z" fill="#F44336" />
+      {/* Right segment — yellow (the pointed tip) */}
       <path
         d="M30 8 L 62 36 L 78 45 C 82 47, 82 53, 78 55 L 62 64 L 30 92 Z M50 44 L 50 56 L 62 50 Z"
         fill="#FFC107"
       />
+      {/* Center notch (slight shadow for depth) */}
       <path d="M50 44 L 62 50 L 50 56 Z" fill="rgba(0,0,0,0.08)" />
     </svg>
   );
