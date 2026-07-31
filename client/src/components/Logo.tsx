@@ -52,7 +52,7 @@ export function Logo({
           )}
           style={{ fontSize: size * 0.42 }}
         >
-          Bring<span className="text-[#C9A24B]">Gift</span>Card
+          Bring<span className="opacity-70">Gift</span>Card
         </span>
       )}
     </span>

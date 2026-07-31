@@ -1,22 +1,33 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { ShieldCheck, Zap } from "lucide-react";
+import { ShieldCheck, Zap, Plus } from "lucide-react";
 
 /**
- * Premium hero showcase — three realistic gift cards
- * (Apple, Amazon, Google Play) arranged in a fan layout.
- * Each card is a hand-crafted CSS/SVG replica of the real brand design.
+ * Premium hero showcase — three BIG, REALISTIC gift cards
+ * (Apple, Amazon, Google Play) arranged in a wide fan layout.
  *
- * Scroll parallax: cards lift and separate subtly as the user scrolls.
+ * - Default state: SPREAD OUT — all three cards clearly visible.
+ * - Click anywhere on the spread → cards COLLAPSE into a neat stack.
+ * - Click again → cards SPREAD back out.
+ *
+ * The whole scene also reacts to scroll for subtle parallax.
+ *
+ * Cards are designed to look like real gift cards:
+ *   - Apple:     clean white + iridescent sheen + Apple logo + "Gift Card"
+ *   - Amazon:    squid-ink navy + amazon wordmark with smile/arrow + "Gift Card"
+ *   - Google Play: light gradient + Google Play triangle logo + "Gift Card"
+ *
+ * No credit-card decorations (no chip, no card number, no cardholder, no
+ * expiry) — these are GIFT CARDS, not debit/credit cards.
  */
 export function Hero3D() {
   const ref = useRef<HTMLDivElement>(null);
+  const [spread, setSpread] = useState(true);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
-
-  // Smooth out scroll.
   const progress = useSpring(scrollYProgress, {
     stiffness: 80,
     damping: 24,
@@ -24,83 +35,138 @@ export function Hero3D() {
   });
 
   // Backdrop glow.
-  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.55, 0.85, 0.4]);
-  const glowScale = useTransform(progress, [0, 1], [1, 1.25]);
+  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.55, 0.85, 0.35]);
+  const glowScale = useTransform(progress, [0, 1], [1, 1.2]);
 
-  // Whole scene lifts subtly.
-  const sceneY = useTransform(progress, [0, 1], [0, -50]);
-  const sceneRotate = useTransform(progress, [0, 1], [0, -3]);
-
-  // Per-card transforms — each lifts at a different rate for depth.
-  const appleY = useTransform(progress, [0, 1], [0, -110]);
-  const appleRotate = useTransform(progress, [0, 1], [-14, -22]);
-  const appleX = useTransform(progress, [0, 1], [0, -50]);
-
-  const amazonY = useTransform(progress, [0, 1], [0, -150]);
-  const amazonScale = useTransform(progress, [0, 1], [1, 1.04]);
-
-  const googleY = useTransform(progress, [0, 1], [0, -110]);
-  const googleRotate = useTransform(progress, [0, 1], [14, 22]);
-  const googleX = useTransform(progress, [0, 1], [0, 50]);
+  // Whole scene lifts subtly with scroll.
+  const sceneY = useTransform(progress, [0, 1], [0, -40]);
 
   // Floating chips parallax.
   const chipLeftY = useTransform(progress, [0, 1], [0, -120]);
   const chipRightY = useTransform(progress, [0, 1], [0, 80]);
 
+  // Card layout configs — when SPREAD vs FOLDED.
+  // SPREAD: rotated out wide, lifted to different heights, offset horizontally.
+  // FOLDED: stacked tightly, only slight rotation, no horizontal offset.
+  const leftRotate = spread ? -22 : 0;
+  const leftOffsetX = spread ? -340 : -30;
+  const leftOffsetY = spread ? -30 : -8;
+  const leftZ = spread ? 10 : 20;
+
+  const centerOffsetY = spread ? -50 : 0;
+  const centerScale = spread ? 1 : 0.95;
+  const centerZ = 30;
+
+  const rightRotate = spread ? 22 : 0;
+  const rightOffsetX = spread ? 340 : 30;
+  const rightOffsetY = spread ? -30 : 8;
+  const rightZ = spread ? 10 : 20;
+
   return (
-    <div ref={ref} className="relative h-[560px] w-full perspective-2000 sm:h-[620px]">
-      {/* Backdrop glow */}
+    <div ref={ref} className="relative h-[680px] w-full perspective-2000 sm:h-[720px]">
+      {/* Backdrop glow (royal blue + gold) */}
       <motion.div
         style={{ opacity: glowOpacity, scale: glowScale }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1E5BD6] blur-[110px] sm:h-96 sm:w-96"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1E5BD6] blur-[120px]"
       />
       <motion.div
         style={{ opacity: glowOpacity }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A24B]/30 blur-[90px] sm:h-72 sm:w-72"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A24B]/25 blur-[110px]"
       />
+
+      {/* Spread/stack toggle button (centered below the fan) */}
+      <button
+        onClick={() => setSpread((s) => !s)}
+        className="absolute bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-xs font-semibold text-white/80 ring-1 ring-white/20 backdrop-blur transition-all hover:bg-white/20 hover:text-white"
+        aria-label={spread ? "Stack cards" : "Spread cards"}
+      >
+        <Plus
+          className={`h-3.5 w-3.5 transition-transform duration-500 ${spread ? "rotate-45" : ""}`}
+        />
+        {spread ? "Stack" : "Spread"}
+      </button>
 
       {/* Card stack */}
       <motion.div
-        style={{ y: sceneY, rotate: sceneRotate }}
+        style={{ y: sceneY }}
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
-        <div className="relative h-[340px] w-[460px] sm:h-[400px] sm:w-[540px]">
+        <div className="relative h-[460px] w-[700px] sm:h-[500px] sm:w-[760px]">
           {/* Ground shadow */}
           <div
-            className="absolute -bottom-6 left-1/2 h-8 w-[70%] -translate-x-1/2 rounded-[50%] bg-black/40 blur-2xl"
+            className="absolute -bottom-2 left-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-black/40 blur-2xl"
             aria-hidden
           />
 
-          {/* Apple card — back left */}
+          {/* LEFT card — Apple */}
           <motion.div
-            style={{ y: appleY, x: appleX, rotate: appleRotate }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            className="absolute left-1/2 top-1/2"
+            animate={{
+              x: leftOffsetX,
+              y: leftOffsetY,
+              rotate: leftRotate,
+              zIndex: leftZ,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 18,
+              mass: 0.9,
+            }}
           >
-            <AppleCard />
+            <div className="-translate-x-1/2 -translate-y-1/2">
+              <AppleCard />
+            </div>
           </motion.div>
 
-          {/* Amazon card — front center */}
+          {/* CENTER card — Amazon (always on top) */}
           <motion.div
-            style={{ y: amazonY, scale: amazonScale }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+            className="absolute left-1/2 top-1/2"
+            animate={{
+              y: centerOffsetY,
+              rotate: 0,
+              scale: centerScale,
+              zIndex: centerZ,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 18,
+              mass: 0.9,
+            }}
           >
-            <AmazonCard />
+            <div className="-translate-x-1/2 -translate-y-1/2">
+              <AmazonCard />
+            </div>
           </motion.div>
 
-          {/* Google Play card — back right */}
+          {/* RIGHT card — Google Play */}
           <motion.div
-            style={{ y: googleY, x: googleX, rotate: googleRotate }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            className="absolute left-1/2 top-1/2"
+            animate={{
+              x: rightOffsetX,
+              y: rightOffsetY,
+              rotate: rightRotate,
+              zIndex: rightZ,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 18,
+              mass: 0.9,
+            }}
           >
-            <GooglePlayCard />
+            <div className="-translate-x-1/2 -translate-y-1/2">
+              <GooglePlayCard />
+            </div>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Floating feature chips (separate parallax) */}
+      {/* Floating feature chips (separate parallax, hidden when folded for cleanliness) */}
       <motion.div
-        style={{ y: chipLeftY }}
-        className="absolute left-0 top-1/2 hidden -translate-y-1/2 sm:block"
+        style={{ y: chipLeftY, opacity: spread ? 1 : 0 }}
+        className="absolute left-0 top-1/2 hidden -translate-y-1/2 transition-opacity duration-300 sm:block"
       >
         <div className="flex items-center gap-2 rounded-2xl bg-white/85 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0047AB]/10 text-[#0047AB]">
@@ -114,8 +180,8 @@ export function Hero3D() {
       </motion.div>
 
       <motion.div
-        style={{ y: chipRightY }}
-        className="absolute right-0 top-1/3 hidden sm:block"
+        style={{ y: chipRightY, opacity: spread ? 1 : 0 }}
+        className="absolute right-0 top-1/3 hidden transition-opacity duration-300 sm:block"
       >
         <div className="flex items-center gap-2 rounded-2xl bg-white/85 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C9A24B]/15 text-[#C9A24B]">
@@ -132,59 +198,44 @@ export function Hero3D() {
 }
 
 /* =========================================================================
-   CARD DIMENSIONS — gift-card aspect ratio (1.586 : 1, same as a credit card)
+   CARD DIMENSIONS — big. Same proportions as a real gift card (1.586 : 1).
    ========================================================================= */
-const CARD_W = 320;
-const CARD_H = Math.round(CARD_W / 1.586); // ~202
+const CARD_W = 460;
+const CARD_H = Math.round(CARD_W / 1.586); // ~290
 
 interface CardProps {
   children: React.ReactNode;
   background: React.ReactNode;
-  /** z-index of the card front content */
-  frontZ?: number;
 }
 
 function CardShell({ children, background }: CardProps) {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl shadow-[0_30px_70px_-20px_rgba(0,0,0,0.55)] ring-1 ring-black/10"
+      className="relative overflow-hidden rounded-3xl shadow-[0_40px_90px_-20px_rgba(0,0,0,0.6)] ring-1 ring-black/10"
       style={{ width: CARD_W, height: CARD_H, transformStyle: "preserve-3d" }}
     >
       {/* Background layer (gradient + brand-specific design) */}
       {background}
 
-      {/* Foreground content (logo, text, chip, etc.) */}
-      <div className="absolute inset-0 p-4">{children}</div>
+      {/* Foreground content (logo + "Gift Card" only) */}
+      <div className="absolute inset-0 p-7">{children}</div>
 
       {/* Subtle top sheen */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-2xl"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-3xl"
         style={{
           background:
-            "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 100%)",
+            "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 100%)",
         }}
       />
     </div>
   );
 }
 
-/** Realistic embossed chip — same proportions as a real EMV chip. */
-function Chip() {
-  return (
-    <div className="relative h-7 w-9 rounded-[5px] bg-gradient-to-br from-[#E5C77B] via-[#C9A24B] to-[#9B7A2E] shadow-inner ring-1 ring-white/30">
-      <div className="absolute inset-[3px] grid grid-cols-3 gap-[1px] opacity-70">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="rounded-[1px] bg-[#7A5F23]" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* =========================================================================
    APPLE GIFT CARD
-   - Clean white card with subtle iridescent sheen
-   - Apple logo (silver-grey) on top-left
+   - Clean white with iridescent sheen
+   - Apple logo (large, top-left)
    - "Gift Card" in Apple-style typography
    ========================================================================= */
 function AppleCard() {
@@ -195,10 +246,10 @@ function AppleCard() {
           <div className="absolute inset-0 bg-gradient-to-br from-white via-[#F8F8F8] to-[#E8E8E8]" />
           {/* Iridescent sheen */}
           <div
-            className="absolute inset-0 opacity-60"
+            className="absolute inset-0 opacity-70"
             style={{
               background:
-                "linear-gradient(115deg, rgba(255,200,255,0.15) 0%, rgba(200,220,255,0.18) 30%, rgba(255,255,200,0.15) 60%, rgba(200,255,220,0.18) 100%)",
+                "linear-gradient(115deg, rgba(255,200,255,0.18) 0%, rgba(200,220,255,0.22) 30%, rgba(255,255,200,0.18) 60%, rgba(200,255,220,0.22) 100%)",
             }}
           />
           {/* Diagonal holographic stripe */}
@@ -206,50 +257,29 @@ function AppleCard() {
             className="absolute -inset-10 opacity-30"
             style={{
               background:
-                "repeating-linear-gradient(115deg, transparent 0px, transparent 30px, rgba(180,200,255,0.15) 30px, rgba(180,200,255,0.15) 60px)",
+                "repeating-linear-gradient(115deg, transparent 0px, transparent 40px, rgba(180,200,255,0.15) 40px, rgba(180,200,255,0.15) 80px)",
             }}
           />
         </>
       }
     >
       <div className="flex h-full flex-col justify-between text-[#1D1D1F]">
-        {/* Top: Apple logo + Gift Card */}
+        {/* Top: Apple logo + USD tag */}
         <div className="flex items-start justify-between">
-          <div className="flex flex-col">
-            <AppleLogo className="h-7 w-7 text-[#1D1D1F]" />
-            <span className="mt-2 font-display text-[11px] font-medium tracking-[0.18em] text-[#86868B]">
-              GIFT CARD
-            </span>
-          </div>
-          <span className="rounded-full bg-[#1D1D1F] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
+          <AppleLogo className="h-12 w-12 text-[#1D1D1F]" />
+          <span className="rounded-full bg-[#1D1D1F] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
             USD
           </span>
         </div>
 
-        {/* Middle: chip + value */}
-        <div className="flex items-center gap-3">
-          <Chip />
-          <div className="font-mono text-[11px] tracking-[0.18em] text-[#1D1D1F]/70">
-            ••••  2025
-          </div>
-        </div>
-
-        {/* Bottom: cardholder + valid */}
-        <div className="flex items-end justify-between border-t border-black/10 pt-2">
-          <div>
-            <p className="text-[8px] font-medium uppercase tracking-wider text-[#86868B]">
-              Cardholder
-            </p>
-            <p className="font-display text-[11px] font-semibold tracking-wide text-[#1D1D1F]">
-              BRING GIFT CARD
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[8px] font-medium uppercase tracking-wider text-[#86868B]">
-              Valid Thru
-            </p>
-            <p className="font-mono text-[10px] text-[#1D1D1F]">12/29</p>
-          </div>
+        {/* Bottom: "Gift Card" wordmark */}
+        <div>
+          <p className="font-display text-3xl font-medium tracking-tight text-[#1D1D1F]">
+            Gift Card
+          </p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-[#86868B]">
+            App Store · iTunes
+          </p>
         </div>
       </div>
     </CardShell>
@@ -281,7 +311,7 @@ function AmazonCard() {
             className="absolute inset-0 opacity-30"
             style={{
               backgroundImage:
-                "radial-gradient(circle at 20% 30%, rgba(255,153,0,0.08), transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.04), transparent 40%)",
+                "radial-gradient(circle at 20% 30%, rgba(255,153,0,0.1), transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.04), transparent 40%)",
             }}
           />
           {/* Top sheen */}
@@ -289,50 +319,34 @@ function AmazonCard() {
             className="absolute inset-x-0 top-0 h-1/3"
             style={{
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)",
+                "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)",
             }}
           />
         </>
       }
     >
       <div className="flex h-full flex-col justify-between text-white">
-        {/* Top: amazon logo + gift card */}
+        {/* Top: amazon logo + USD tag */}
         <div className="flex items-start justify-between">
           <div>
             <AmazonWordmark />
-            <p className="mt-1.5 font-display text-[10px] font-medium uppercase tracking-[0.25em] text-white/70">
+            <p className="mt-2 font-display text-[11px] font-medium uppercase tracking-[0.3em] text-white/70">
               Gift Card
             </p>
           </div>
-          <span className="rounded-full bg-[#FF9900] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-[#232F3E]">
+          <span className="rounded-full bg-[#FF9900] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#232F3E]">
             USD
           </span>
         </div>
 
-        {/* Middle: chip + card number */}
-        <div className="flex items-center gap-3">
-          <Chip />
-          <div className="font-mono text-[11px] tracking-[0.2em] text-white/80">
-            ••••  3025
-          </div>
-        </div>
-
-        {/* Bottom: cardholder + valid */}
-        <div className="flex items-end justify-between border-t border-white/15 pt-2">
-          <div>
-            <p className="text-[8px] font-medium uppercase tracking-wider text-white/50">
-              Cardholder
-            </p>
-            <p className="font-display text-[11px] font-semibold tracking-wide text-white">
-              BRING GIFT CARD
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[8px] font-medium uppercase tracking-wider text-white/50">
-              Valid Thru
-            </p>
-            <p className="font-mono text-[10px] text-white">12/29</p>
-          </div>
+        {/* Bottom: "Gift Card" wordmark */}
+        <div>
+          <p className="font-display text-3xl font-semibold tracking-tight text-white">
+            Gift Card
+          </p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-white/50">
+            Shop millions of items
+          </p>
         </div>
       </div>
     </CardShell>
@@ -342,7 +356,7 @@ function AmazonCard() {
 function AmazonWordmark() {
   // "amazon" lowercase wordmark with the signature smile/arrow underneath.
   return (
-    <svg viewBox="0 0 100 36" className="h-7 w-20" aria-hidden>
+    <svg viewBox="0 0 100 36" className="h-9 w-24" aria-hidden>
       {/* "amazon" wordmark */}
       <text
         x="0"
@@ -378,7 +392,7 @@ function AmazonWordmark() {
 
 /* =========================================================================
    GOOGLE PLAY GIFT CARD
-   - Light gradient background (white → very pale grey/blue)
+   - Light gradient background
    - Multi-color Google Play triangle logo
    - "Gift Card" in dark grey
    ========================================================================= */
@@ -390,53 +404,32 @@ function GooglePlayCard() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#FFFFFF] via-[#F5F7FA] to-[#E8ECF2]" />
           {/* Subtle holographic sweep */}
           <div
-            className="absolute -inset-10 opacity-40"
+            className="absolute -inset-10 opacity-50"
             style={{
               background:
-                "linear-gradient(115deg, transparent 30%, rgba(0,197,255,0.08) 45%, rgba(0,230,118,0.08) 55%, rgba(255,193,7,0.08) 65%, rgba(255,61,0,0.08) 75%, transparent 90%)",
+                "linear-gradient(115deg, transparent 30%, rgba(0,197,255,0.1) 45%, rgba(0,230,118,0.1) 55%, rgba(255,193,7,0.1) 65%, rgba(255,61,0,0.1) 75%, transparent 90%)",
             }}
           />
         </>
       }
     >
       <div className="flex h-full flex-col justify-between text-[#202124]">
-        {/* Top: Google Play logo + Gift Card */}
+        {/* Top: Google Play logo + USD tag */}
         <div className="flex items-start justify-between">
-          <div className="flex flex-col">
-            <GooglePlayLogo className="h-7 w-7" />
-            <span className="mt-2 font-display text-[11px] font-medium tracking-[0.18em] text-[#5F6368]">
-              GIFT CARD
-            </span>
-          </div>
-          <span className="rounded-full bg-[#202124] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
+          <GooglePlayLogo className="h-12 w-12" />
+          <span className="rounded-full bg-[#202124] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
             USD
           </span>
         </div>
 
-        {/* Middle: chip + card number */}
-        <div className="flex items-center gap-3">
-          <Chip />
-          <div className="font-mono text-[11px] tracking-[0.18em] text-[#202124]/70">
-            ••••  4025
-          </div>
-        </div>
-
-        {/* Bottom: cardholder + valid */}
-        <div className="flex items-end justify-between border-t border-black/10 pt-2">
-          <div>
-            <p className="text-[8px] font-medium uppercase tracking-wider text-[#5F6368]">
-              Cardholder
-            </p>
-            <p className="font-display text-[11px] font-semibold tracking-wide text-[#202124]">
-              BRING GIFT CARD
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[8px] font-medium uppercase tracking-wider text-[#5F6368]">
-              Valid Thru
-            </p>
-            <p className="font-mono text-[10px] text-[#202124]">12/29</p>
-          </div>
+        {/* Bottom: "Gift Card" wordmark */}
+        <div>
+          <p className="font-display text-3xl font-semibold tracking-tight text-[#202124]">
+            Gift Card
+          </p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-[#5F6368]">
+            Play · Apps · Games
+          </p>
         </div>
       </div>
     </CardShell>

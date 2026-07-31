@@ -19,7 +19,7 @@ import { Hero3D } from "@/components/Hero3D";
 import { CardGrid } from "@/components/CardGrid";
 import { Footer } from "@/components/Footer";
 import { AdminLoginModal } from "@/components/AdminLoginModal";
-import { AnimatedSection, RevealText, StaggerContainer, StaggerItem } from "@/components/AnimatedSection";
+import { AnimatedSection, DropText, StaggerContainer, StaggerItem } from "@/components/AnimatedSection";
 import { fetchGiftCards } from "@/lib/api";
 import type { GiftCard } from "@/lib/types";
 
@@ -76,6 +76,21 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
       <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[#1E5BD6]/30 blur-[120px]" />
       <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-[#C9A24B]/10 blur-[100px]" />
 
+      {/* Logo watermark — blended into the royal-blue background.
+          Uses CSS filters to drop the white card-logo down to a subtle
+          blue-tinted silhouette that floats behind the content. No white blob. */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none"
+        aria-hidden
+      >
+        <img
+          src="/logo-white.png"
+          alt=""
+          className="h-[520px] w-[520px] object-contain opacity-[0.06] mix-blend-screen"
+          draggable={false}
+        />
+      </div>
+
       <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-32 sm:px-6 lg:grid-cols-2 lg:px-8">
         {/* Left — copy */}
         <div>
@@ -93,12 +108,12 @@ function Hero({ onAdminLogin: _onAdminLogin }: { onAdminLogin: () => void }) {
           </motion.div>
 
           <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
-            <RevealText text="Your trusted" />
+            <DropText text="Your trusted" as="span" />
             <br />
-            <RevealText text="global gift card" delay={0.15} />
+            <DropText text="global gift card" as="span" delay={0.4} />
             <br />
             <span className="text-gradient-royal">
-              <RevealText text="partner." delay={0.3} />
+              <DropText text="partner." as="span" delay={0.85} />
             </span>
           </h1>
 

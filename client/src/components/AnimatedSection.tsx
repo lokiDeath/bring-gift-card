@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
 interface AnimatedSectionProps {
   children: ReactNode;
@@ -35,7 +35,7 @@ export function AnimatedSection({
   );
 }
 
-/** Stagger container — children with `staggerItem` will reveal in sequence. */
+/** Stagger container — children with `staggerItem` reveal in sequence. */
 export function StaggerContainer({
   children,
   className = "",
@@ -91,7 +91,10 @@ export function StaggerItem({
   );
 }
 
-/** Word-by-word reveal for headlines. */
+/**
+ * RevealText — word-by-word slide-up reveal (used in older heroes).
+ * Kept for backwards compatibility but not used in the new hero.
+ */
 export function RevealText({
   text,
   className = "",
@@ -125,4 +128,86 @@ export function RevealText({
       ))}
     </span>
   );
+}
+
+/**
+ * DropText — letters drop down one-by-one from above and settle into place.
+ *
+ * Triggers:
+ *   - On mount (page load / reload)
+ *   - When the element re-enters the viewport after scrolling away (so the user
+ *     can replay the effect by scrolling back to the top of the page).
+ *
+ * Each letter starts above its slot (y: -120%), fades in from opacity 0, and
+ * drops with a spring bounce — like rain falling into a row.
+ *
+ * The trigger fires whenever `inView` flips from false → true. Because
+ * `once` is false, scrolling away and back re-triggers the drop.
+ */
+export function DropText({
+  text,
+  className = "",
+  delay = 0,
+  stagger = 0.05,
+  dropDistance = "120%",
+  as: Tag = "span",
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+  /** Seconds between consecutive letters. */
+  stagger?: number;
+  /** How far above each letter starts. Any CSS length, e.g. "120%" or "-80px". */
+  dropDistance?: string;
+  as?: "span" | "h1" | "h2" | "h3" | "p";
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { amount: 0.4 });
+
+  return (
+    <Tag
+      ref={ref as React.Ref<HTMLHeadingElement>}
+      className={className}
+      aria-label={text}
+    >
+      {text.split("").map((ch, i) => (
+        <span
+          key={`${ch}-${i}`}
+          className="inline-block overflow-hidden align-bottom"
+          style={{ whiteSpace: "pre" }}
+        >
+          <motion.span
+            className="inline-block"
+            initial={{ y: `-${dropDistance}` , opacity: 0 }}
+            animate={
+              isInView
+                ? { y: 0, opacity: 1 }
+                : { y: `-${dropDistance}`, opacity: 0 }
+            }
+            transition={{
+              type: "spring",
+              stiffness: 220,
+              damping: 18,
+              mass: 0.7,
+              delay: delay + i * stagger,
+            }}
+          >
+            {ch}
+          </motion.span>
+        </span>
+      ))}
+    </Tag>
+  );
+}
+
+/**
+ * useHeroDropTrigger — a small hook that returns `true` whenever the hero is
+ * near the top of the viewport, so the DropText re-fires when the user scrolls
+ * back up. This is wired into the Home hero so the headline re-drops on scroll
+ * back to top, on top of DropText's own in/out trigger.
+ */
+export function useHeroDropTrigger() {
+  const { scrollY } = useScroll();
+  // Boolean-ish transform: 1 when at top (scrollY < 50), 0 when scrolled past 200.
+  return useTransform(scrollY, [0, 50, 200], [1, 1, 0]);
 }
